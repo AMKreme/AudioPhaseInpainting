@@ -5,7 +5,7 @@ coefficients from a short-time Fourier transform (STFT). More precisely, it is a
 
 For more information please contact ama-marina.kreme@univ-amu.fr/valentin.emiya@lis-lab.fr
 
-#Instruction for Matlab
+#Instruction for Matlab user
 
 ## Installation
 
@@ -22,15 +22,13 @@ which can be downloaded  at  https://ltfat.github.io
 ## About AudioPhaseInpainting
 It contains several directories described below:
 - algorithms: contains the functions and classes of the GLI, PLI and PCI algorithms
-- performances : contains the functions which are used in the manuscript for the measurement of the reconstruction error of our algorithms
-- utils : contains all the functions necessary for the implementation of our algorithms
-- problem_generation : contains the creation of the synthetic signal that was used in our experiments
+- performances : contains the functions that are used in this thesis to estimate the reconstruction error of our algorithms
+- utils : contains all the annex functions necessary to the implementation of our algorithms
+- problem_generation : contains the creation of the synthetic signal which was used in our experiments
 - experiments_scripts : contains the scripts allowing to perform all the experiments described for each algorithm
 - results_scripts : contains the scripts to collect and display the results of all the experiments described for each algorithm
 - script_run_all_experiment.m: runs all experiments
 - script_plot_all_exp_results.m: displays the results of all experiments
-
-Translated with www.DeepL.com/Translator (free version)
 
 ## Usage
 
