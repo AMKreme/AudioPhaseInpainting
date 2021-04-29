@@ -1,0 +1,351 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>exp_audio_phase_inpainting</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-04-29"><meta name="DC.source" content="exp_audio_phase_inpainting.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Example of the solution of the problem phase inpainting in small dimension</a></li><li><a href="#3">Generate the parameters of the Gabor transform and the operators</a></li><li><a href="#4">Generation and display of the binary mask</a></li><li><a href="#5">Implementation of our algorithms</a></li><li><a href="#6">RPI</a></li><li><a href="#8">The respective reconstruction errors are</a></li></ul></div><pre class="codeinput">clc; clear; close <span class="string">all</span>
+</pre><h2 id="2">Example of the solution of the problem phase inpainting in small dimension</h2><pre class="codeinput"><span class="comment">%* Test signal generation</span>
+sig_len = 32;
+fs = 2;
+flim1 = [0, 20];
+flim2 = [20, 15];
+snr = 2;
+
+signal_params=  generate_signal_parameters(sig_len, fs,flim1,<span class="keyword">...</span><span class="comment">,</span>
+    flim2, snr);
+
+x_ref = generate_chirp_dirac_noise(sig_len,signal_params);
+
+fprintf(<span class="string">"The signal length is :%.f\n\n"</span>,sig_len)
+</pre><pre class="codeoutput">The signal length is :32
+
+</pre><h2 id="3">Generate the parameters of the Gabor transform and the operators</h2><pre class="codeinput"><span class="comment">%*Gabor parameters</span>
+win_type=<span class="string">'hann'</span>;
+approx_win_len = 8;
+hop = approx_win_len/2;
+nbins = approx_win_len*2;
+
+dgt_params = generate_stft_parameters(win_type, approx_win_len, hop,<span class="keyword">...</span><span class="comment">,</span>
+    nbins, sig_len);
+
+[dgt, idgt,pseudoinv] = get_stft_operators(dgt_params, sig_len);
+
+fprintf(<span class="string">"The DGT parameters are :\n -win_type : %s\n -hop : %.f\n -nbins: %.f\n"</span>, win_type, hop, nbins)
+
+
+<span class="comment">%*Gabor transform of the generated signal</span>
+x_tf = dgt(x_ref);
+
+
+figure;
+plot_spectrogram(x_tf, dgt_params, signal_params, dgt);
+</pre><pre class="codeoutput">The DGT parameters are :
+ -win_type : hann
+ -hop : 4
+ -nbins: 16
+</pre><img vspace="5" hspace="5" src="exp_audio_phase_inpainting_01.png" alt=""> <h2 id="4">Generation and display of the binary mask</h2><pre class="codeinput">missing_ratio = 0.8;
+width=1;
+
+fprintf(<span class="string">"The ratio of missing phases is %.f %% \n"</span>,missing_ratio*100)
+fprintf(<span class="string">"The width of the hidden areas is %.f \n"</span>,width)
+
+[b, mask] = generate_random_missing_phases(x_tf, missing_ratio, width);
+
+
+figure;
+plot_spectrogram(mask, dgt_params, signal_params, dgt);
+</pre><pre class="codeoutput">The ratio of missing phases is 80 % 
+The width of the hidden areas is 1 
+</pre><img vspace="5" hspace="5" src="exp_audio_phase_inpainting_02.png" alt=""> <h2 id="5">Implementation of our algorithms</h2><pre class="codeinput"><span class="comment">%* GLI</span>
+verbose_it=1000;
+
+n_iter = 2000;
+tracker_gli = GLTracker(x_ref, idgt);
+
+t0=  cputime;
+
+x_gli= griffin_lim_inpainting(mask,b, dgt, idgt, <span class="keyword">...</span><span class="comment">,</span>
+            n_iter,verbose_it,tracker_gli);
+runtime_gli = cputime - t0;
+fprintf(<span class="string">"The calculation time by GLI is  %f s\n"</span>,runtime_gli)
+
+<span class="comment">%* PCI</span>
+
+n_iter_pci = 5000;
+nu = 1e-14;
+<span class="comment">% matrix des atomes de Gabor</span>
+vec = @(x) x(:);
+
+nb_atoms_gabor = numel(x_tf);
+A = zeros(nb_atoms_gabor,sig_len);
+I = eye(sig_len);
+<span class="keyword">for</span> ii=1:sig_len
+
+    A(:,ii) =vec(dgt(I(ii,:)));
+<span class="keyword">end</span>
+
+G = A*pinv(A,1e-10);
+
+tracker_pci = PhasecutTracker(x_ref,b, idgt);
+ t0 = cputime;
+ x_pci = phasecut_inpainting(mask,b,G,idgt, n_iter_pci,nu, verbose_it, tracker_pci);
+runtime_pci = cputime-t0;
+fprintf(<span class="string">"The calculation time by PCI is : %f s\n"</span>,runtime_gli)
+
+<span class="comment">%*PLI</span>
+
+epsilon =1e-16;
+obs = observations(b, mask);
+
+
+tracker_pli = PhaseLiftTracker(x_ref);
+t0=  cputime;
+[X_pli_cvx,x_pli_cvx] = phaselift_inpainting_cvx(A, mask, obs, epsilon, tracker_pli);
+runtime_pli = cputime - t0;
+fprintf(<span class="string">"The calculation time by PLI is : %f s\n"</span>,runtime_pli)
+</pre><pre class="codeoutput">The calculation time by GLI is  6.280000 s
+Iteration 1000
+Iteration 2000
+Iteration 3000
+Iteration 4000
+Iteration 5000
+The calculation time by PCI is : 6.280000 s
+The calculation time by PLI is : 4.330000 s
+</pre><h2 id="6">RPI</h2><pre class="codeinput">x_rpi = random_phase_inpainting(mask,b,idgt);
+</pre><pre class="codeinput"><span class="comment">%* The figures</span>
+x_pci_f = fix_global_phase(x_ref, x_pci);
+x_pli_f = fix_global_phase(x_ref, x_pli_cvx);
+
+figure(<span class="string">'Position'</span>,[10 10 900 600]); plot(x_ref,<span class="string">'b'</span>,<span class="string">'LineWidth'</span>,2);
+hold <span class="string">on</span>;
+plot(real(x_gli),<span class="string">'r--'</span>,<span class="string">'LineWidth'</span>,2);
+plot(real(x_pci_f),<span class="string">'g--'</span>,<span class="string">'LineWidth'</span>,2);
+plot(real(x_pli_f),<span class="string">'m--'</span>,<span class="string">'LineWidth'</span>,2);
+plot(real(x_rpi),<span class="string">'c--'</span>,<span class="string">'LineWidth'</span>,2);
+grid()
+
+legend(<span class="string">'original'</span>,<span class="string">'GLI'</span>,<span class="string">'PCI'</span>,<span class="string">'PLI'</span>,<span class="string">'RPI'</span>,<span class="string">'Location'</span>,<span class="string">'northeastoutside'</span>)
+xlabel(<span class="string">"Temps (&eacute;chantillons)"</span>);
+ylabel(<span class="string">'Amplitude'</span>)
+set(gca, <span class="string">'FontSize'</span>, 20, <span class="string">'fontName'</span>,<span class="string">'Times'</span>);
+</pre><img vspace="5" hspace="5" src="exp_audio_phase_inpainting_03.png" alt=""> <h2 id="8">The respective reconstruction errors are</h2><pre class="codeinput">disp(<span class="string">"les erreurs de recontruction en dB sont :"</span>)
+
+err_gli = compute_error(x_ref, x_gli);
+err_pci = compute_error(x_ref, x_pci);
+
+err_pli = compute_error(x_ref, x_pli_cvx);
+
+fprintf(<span class="string">"GLI :%f\n"</span>,err_gli)
+fprintf(<span class="string">"PCI :%f\n"</span>,err_pci)
+fprintf(<span class="string">"PLI :%f\n"</span>,err_pli)
+</pre><pre class="codeoutput">les erreurs de recontruction en dB sont :
+GLI :-1.531629
+PCI :-23.426509
+PLI :-158.451392
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clc; clear; close all
+%% Example of the solution of the problem phase inpainting in small dimension 
+
+%* Test signal generation
+sig_len = 32;
+fs = 2;
+flim1 = [0, 20];
+flim2 = [20, 15];
+snr = 2;
+
+signal_params=  generate_signal_parameters(sig_len, fs,flim1,...,
+    flim2, snr);
+
+x_ref = generate_chirp_dirac_noise(sig_len,signal_params);
+
+fprintf("The signal length is :%.f\n\n",sig_len)
+%%  Generate the parameters of the Gabor transform and the operators
+
+%*Gabor parameters
+win_type='hann';
+approx_win_len = 8;
+hop = approx_win_len/2;
+nbins = approx_win_len*2;
+
+dgt_params = generate_stft_parameters(win_type, approx_win_len, hop,...,
+    nbins, sig_len);
+
+[dgt, idgt,pseudoinv] = get_stft_operators(dgt_params, sig_len);
+
+fprintf("The DGT parameters are :\n -win_type : %s\n -hop : %.f\n -nbins: %.f\n", win_type, hop, nbins)
+
+
+%*Gabor transform of the generated signal
+x_tf = dgt(x_ref);
+
+
+figure; 
+plot_spectrogram(x_tf, dgt_params, signal_params, dgt);
+
+%% Generation and display of the binary mask
+missing_ratio = 0.8;
+width=1;
+
+fprintf("The ratio of missing phases is %.f %% \n",missing_ratio*100)
+fprintf("The width of the hidden areas is %.f \n",width) 
+
+[b, mask] = generate_random_missing_phases(x_tf, missing_ratio, width);
+ 
+
+figure; 
+plot_spectrogram(mask, dgt_params, signal_params, dgt);
+
+%% Implementation of our algorithms  
+%* GLI
+verbose_it=1000;
+
+n_iter = 2000;
+tracker_gli = GLTracker(x_ref, idgt);
+        
+t0=  cputime;
+
+x_gli= griffin_lim_inpainting(mask,b, dgt, idgt, ...,
+            n_iter,verbose_it,tracker_gli);
+runtime_gli = cputime - t0;
+fprintf("The calculation time by GLI is  %f s\n",runtime_gli)
+
+%* PCI
+
+n_iter_pci = 5000;
+nu = 1e-14;
+% matrix des atomes de Gabor
+vec = @(x) x(:);
+
+nb_atoms_gabor = numel(x_tf);
+A = zeros(nb_atoms_gabor,sig_len);
+I = eye(sig_len);
+for ii=1:sig_len
+    
+    A(:,ii) =vec(dgt(I(ii,:)));
+end
+
+G = A*pinv(A,1e-10);
+
+tracker_pci = PhasecutTracker(x_ref,b, idgt);
+ t0 = cputime;
+ x_pci = phasecut_inpainting(mask,b,G,idgt, n_iter_pci,nu, verbose_it, tracker_pci);
+runtime_pci = cputime-t0;
+fprintf("The calculation time by PCI is : %f s\n",runtime_gli)
+
+%*PLI
+
+epsilon =1e-16;
+obs = observations(b, mask);
+
+
+tracker_pli = PhaseLiftTracker(x_ref);
+t0=  cputime;
+[X_pli_cvx,x_pli_cvx] = phaselift_inpainting_cvx(A, mask, obs, epsilon, tracker_pli);
+runtime_pli = cputime - t0;
+fprintf("The calculation time by PLI is : %f s\n",runtime_pli)
+
+%%  RPI
+
+x_rpi = random_phase_inpainting(mask,b,idgt);
+%%
+
+
+%* The figures
+x_pci_f = fix_global_phase(x_ref, x_pci);
+x_pli_f = fix_global_phase(x_ref, x_pli_cvx);  
+  
+figure('Position',[10 10 900 600]); plot(x_ref,'b','LineWidth',2);
+hold on; 
+plot(real(x_gli),'rREPLACE_WITH_DASH_DASH','LineWidth',2);
+plot(real(x_pci_f),'gREPLACE_WITH_DASH_DASH','LineWidth',2);
+plot(real(x_pli_f),'mREPLACE_WITH_DASH_DASH','LineWidth',2);
+plot(real(x_rpi),'cREPLACE_WITH_DASH_DASH','LineWidth',2);
+grid()
+
+legend('original','GLI','PCI','PLI','RPI','Location','northeastoutside')
+xlabel("Temps (échantillons)");
+ylabel('Amplitude')
+set(gca, 'FontSize', 20, 'fontName','Times');
+
+
+%% The respective reconstruction errors are 
+disp("les erreurs de recontruction en dB sont :")
+
+err_gli = compute_error(x_ref, x_gli);
+err_pci = compute_error(x_ref, x_pci);
+
+err_pli = compute_error(x_ref, x_pli_cvx);
+
+fprintf("GLI :%f\n",err_gli)
+fprintf("PCI :%f\n",err_pci)
+fprintf("PLI :%f\n",err_pli)
+
+%%
+
+##### SOURCE END #####
+--></body></html>
