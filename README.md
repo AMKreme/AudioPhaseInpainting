@@ -1,7 +1,7 @@
 # AudioPhaseInpainting
 Toolbox for phase inpainting in time frequency plane (Code available both in matlab and python). It allows to reconstruct the missing phases of some complex 
 coefficients from a short-time Fourier transform (STFT). More precisely, it is about the implementations of the algorithms from the paper 
-*Phase reconstruction for time-frequency inpainting,by A.Marina Krémé, Valentin Emiya and Caroline Chaux, 2018.*
+**Phase reconstruction for time-frequency inpainting,by A.Marina Krémé, Valentin Emiya and Caroline Chaux, 2018.**
 
 For more information please contact ama-marina.kreme@univ-amu.fr/valentin.emiya@lis-lab.fr
 
