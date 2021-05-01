@@ -28,7 +28,20 @@ It contains several directories described below:
 - experiments_scripts : contains the scripts allowing to perform all the experiments described for each algorithm
 - results_scripts : contains the scripts to collect and display the results of all the experiments described for each algorithm
 - script_run_all_experiment.m: runs all experiments
-- script_plot_all_exp_results.m: displays the results of all experiments
+- *script_plot_all_exp_results.m*: displays the results of all experiments
+
+
+
+We compared GLI, PCI and PLI to a reference method which consists in replacing the missing phases by random phases (RPI).
+Considering the complexity in memory as well as in time, we have 
+- a quick and small demonstration on a synthetic signal where we compare GLI , PCI, PLI and RPI. 
+To reproduce it, you just have to launch the script *exp_audio_phase_inpainting.m*. 
+You can also see the result directly by clicking on the following link http://kreme.perso.math.cnrs.fr/AudiophaseInpainting/index.html
+
+-  nous avons réalisé une expérience sur un signal audio qui est le bruit du moteur d'une voiture. Dans ce signal, il manque % de phases. Nous l'avons reconstruit avec GLI et RPI et comparé les résultats visuel et audible . Les résultats sont disponible  ici.
+
+
+
 
 ## Usage
 
