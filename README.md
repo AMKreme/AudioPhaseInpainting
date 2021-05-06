@@ -38,9 +38,6 @@ Considering the complexity in memory as well as in time, we have
 To reproduce it, you just have to launch the script *exp_audio_phase_inpainting.m*. 
 You can also see the result directly by clicking on the following link http://kreme.perso.math.cnrs.fr/AudiophaseInpainting/index.html
 
--  nous avons réalisé une expérience sur un signal audio qui est le bruit du moteur d'une voiture. Dans ce signal, il manque % de phases. Nous l'avons reconstruit avec GLI et RPI et comparé les résultats visuel et audible . Les résultats sont disponible  ici.
-
-
 
 
 ## Usage
