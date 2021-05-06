@@ -6,7 +6,7 @@ clc; clear; close all;
  script_generate_all_experiment_data;
 %%
 disp("all experiments - situation 1")
-disp()
+%disp("\n\n")
 
 disp("GLI experiment")
 exp_gli_var_miss_ratio;
