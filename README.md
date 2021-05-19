@@ -3,7 +3,7 @@ Toolbox for phase inpainting in time frequency plane (Code available both in mat
 coefficients from a short-time Fourier transform (STFT). More precisely, it is about the implementations of the algorithms from the paper 
 **Phase reconstruction for time-frequency inpainting,by A.Marina Krémé, Valentin Emiya and Caroline Chaux, 2018.**
 
-For more information please contact ama-marina.kreme@univ-amu.fr/valentin.emiya@lis-lab.fr
+For more information please contact ama-marina.kreme@univ-amu.fr/ valentin.emiya@lis-lab.fr
 
 #Instruction for Matlab user
 
